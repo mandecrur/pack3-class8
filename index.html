@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clase 8</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #1A2B4A;
+  --red:     #C0392B;
+  --border:  #BBBCBD;
+  --light:   #F2F3F4;
+  --text:    #1A1A1A;
+  --muted:   #555;
+  --correct: #1A6B3A;
+  --correct-bg: #EAF5EE;
+  --wrong-bg:   #FDF0EE;
+  --wrong:      #B83232;
+  --exp-bg:     #F0F4FB;
+  --exp-border: #3B5FA0;
+}
+
+html { font-size: 16px; }
+
+body {
+  background: #E8E8E8;
+  font-family: 'Source Sans 3', Arial, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem 3rem;
+}
+
+/* ── Page shell (A4-ish) ── */
+.page {
+  width: 100%;
+  max-width: 720px;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(0,0,0,.18);
+}
+
+/* ── Top bar ── */
+.top-bar {
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 52px;
+}
+
+.top-left {
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  border-right: 1px solid rgba(255,255,255,.15);
+}
+
+.top-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: .5rem 1rem;
+  text-align: center;
+}
+
+.top-center .title {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.top-center .subtitle {
+  font-size: 0.72rem;
+  opacity: .75;
+  margin-top: 2px;
+  letter-spacing: .03em;
+}
+
+.top-right {
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  border-left: 1px solid rgba(255,255,255,.15);
+  white-space: nowrap;
+}
+
+/* ── Red stripe ── */
+.red-stripe {
+  height: 5px;
+  background: var(--red);
+}
+
+/* ── Progress ── */
+.progress-area {
+  background: var(--light);
+  border-bottom: 1px solid var(--border);
+  padding: .65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.progress-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--navy);
+  border-radius: 3px;
+  transition: width .5s ease;
+}
+
+.progress-score {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Question body ── */
+.q-body {
+  padding: 2rem 2rem 1.5rem;
+}
+
+/* Question number badge */
+.q-number-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 1rem;
+}
+
+.q-num-badge {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-top: 1px;
+}
+
+.q-text-wrap {
+  flex: 1;
+}
+
+/* Context box (for scenario questions) */
+.context-box {
+  background: var(--light);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--navy);
+  padding: .85rem 1.1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  font-family: 'Source Serif 4', Georgia, serif;
+  color: var(--text);
+}
+
+.context-box p + p { margin-top: .5rem; }
+
+.context-box .ctx-label {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin-bottom: .45rem;
+}
+
+/* Question stem */
+.q-stem {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text);
+  margin-bottom: 1.1rem;
+}
+
+.q-stem strong {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-style: solid;
+  text-underline-offset: 2px;
+}
+
+/* Options */
+.options { display: flex; flex-direction: column; gap: 0; }
+
+.opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-top: none;
+  cursor: pointer;
+  transition: background .12s;
+  background: #fff;
+}
+
+.opt:first-child { border-top: 1px solid var(--border); }
+
+.opt:hover:not(.locked) { background: #F7F8FA; }
+
+.opt-key-cell {
+  flex-shrink: 0;
+  width: 42px;
+  padding: .7rem .5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  border-right: 1px solid var(--border);
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  min-height: 42px;
+}
+
+.opt-text-cell {
+  flex: 1;
+  padding: .7rem .9rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text);
+  font-family: 'Source Serif 4', Georgia, serif;
+}
+
+/* States */
+.opt.correct               { background: var(--correct-bg); border-color: var(--correct); }
+.opt.correct + .opt        { border-top-color: var(--correct); }
+.opt.correct .opt-key-cell { color: var(--correct); border-right-color: var(--correct); font-weight: 600; }
+.opt.correct .opt-text-cell{ color: var(--correct); font-weight: 600; }
+
+.opt.wrong                 { background: var(--wrong-bg); border-color: var(--wrong); }
+.opt.wrong + .opt          { border-top-color: var(--wrong); }
+.opt.wrong .opt-key-cell   { color: var(--wrong); border-right-color: var(--wrong); }
+.opt.wrong .opt-text-cell  { color: var(--wrong); }
+
+.opt.dimmed                { opacity: .35; pointer-events: none; }
+.opt.locked                { cursor: default; }
+
+/* After-answer feedback row */
+.feedback-row {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: .55rem .9rem;
+  border: 1px solid var(--border);
+  border-top: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.feedback-row.show { display: flex; }
+.feedback-row.ok   { background: var(--correct-bg); color: var(--correct); border-color: var(--correct); }
+.feedback-row.bad  { background: var(--wrong-bg);   color: var(--wrong);   border-color: var(--wrong); }
+
+/* Explanation */
+.explanation {
+  display: none;
+  margin-top: 1rem;
+  background: var(--exp-bg);
+  border: 1px solid #C5D0E8;
+  border-left: 4px solid var(--exp-border);
+  padding: .9rem 1.1rem;
+}
+.explanation.show { display: block; }
+
+.exp-label {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--exp-border);
+  margin-bottom: .4rem;
+}
+
+.exp-text {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #1C2D52;
+  font-family: 'Source Serif 4', Georgia, serif;
+}
+
+.exp-text strong { font-weight: 600; }
+.exp-text em     { font-style: italic; }
+
+/* Divider between q and footer */
+.q-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1.25rem 0 1rem;
+}
+
+/* Footer nav */
+.q-footer {
+  padding: 0 2rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-tag {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-family: 'Source Sans 3', sans-serif;
+  letter-spacing: .03em;
+}
+
+.btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 22px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .02em;
+  transition: background .15s, transform .08s;
+}
+.btn-next:hover:not(:disabled) { background: #0F1E36; transform: translateX(2px); }
+.btn-next:disabled { opacity: .35; cursor: default; transform: none; }
+.btn-next svg { flex-shrink: 0; }
+
+/* ── Bottom bar ── */
+.bottom-bar {
+  background: var(--light);
+  border-top: 1px solid var(--border);
+  padding: .55rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-family: 'Source Sans 3', sans-serif;
+  letter-spacing: .02em;
+}
+
+.bottom-bar .minedu-tag {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+/* ── Final screen ── */
+.final-body {
+  display: none;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.final-header {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: .35rem;
+}
+
+.final-score-num {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 4rem;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1;
+  margin: 1rem 0 .25rem;
+}
+
+.final-score-num span { font-size: 1.8rem; color: var(--muted); }
+
+.final-pct {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+
+.final-bar-wrap {
+  max-width: 320px;
+  margin: 0 auto 1.5rem;
+  background: var(--border);
+  height: 6px;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.final-bar {
+  height: 100%;
+  background: var(--navy);
+  transition: width 1s ease;
+  width: 0%;
+}
+
+.final-msg {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: .4rem;
+}
+
+.final-sub {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+
+.review-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.review-table th {
+  background: var(--navy);
+  color: #fff;
+  padding: 7px 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.review-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'Source Serif 4', Georgia, serif;
+  vertical-align: top;
+  color: var(--text);
+}
+
+.review-table tr:nth-child(even) td { background: var(--light); }
+
+.ri-ok  { color: var(--correct); font-weight: 600; }
+.ri-bad { color: var(--wrong);   font-weight: 600; }
+
+.btn-restart {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 26px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .02em;
+  transition: background .15s;
+}
+.btn-restart:hover { background: #0F1E36; }
+
+@media (max-width: 500px) {
+  .top-left, .top-right { display: none; }
+  .q-body, .q-footer { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .context-box, .explanation { padding: .7rem .85rem; }
+  .final-body { padding: 2rem 1.25rem; }
+  .final-score-num { font-size: 3rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-left">EBR Secundaria</div>
+    <div class="top-center">
+      <div class="title">Clase 8 — Casuística</div>
+      <div class="subtitle">Convivencia · Trabajo Colaborativo · TIC &nbsp;|&nbsp; Inglés EBR Secundaria</div>
+    </div>
+    <div class="top-right">Preguntas 6 – 10 de 20</div>
+  </div>
+  <div class="red-stripe"></div>
+
+  <!-- Progress -->
+  <div class="progress-area">
+    <span class="progress-label" id="prog-label">Pregunta 6 de 20</span>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:20%"></div></div>
+    <span class="progress-score" id="prog-score">0 correctas</span>
+  </div>
+
+  <!-- Question body -->
+  <div class="q-body" id="q-body"></div>
+
+  <!-- Footer nav -->
+  <div class="q-footer" id="q-footer">
+    <span class="page-tag" id="page-tag"></span>
+    <button class="btn-next" id="btn-next" disabled>
+      Siguiente
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+  </div>
+
+  <!-- Final screen -->
+  <div class="final-body" id="final-body"></div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <span class="minedu-tag">MINEDU · CNEB 2017</span>
+    <span>Área: Inglés como Lengua Extranjera · EBR Secundaria</span>
+    <span id="bottom-pg">6</span>
+  </div>
+
+</div>
+
+<script>
+const Qs = [
+  {
+    tag: "Convivencia democrática — acuerdos sobre el uso del inglés",
+    context: "A teacher notices that during group discussions in English, students always speak in Spanish among themselves. She wants to encourage English use without damaging the classroom climate.",
+    stem: "Which action best reflects <strong>democratic coexistence AND active language use</strong>?",
+    opts: [
+      "Establish a rule: every time a student speaks Spanish during group work, the group loses a point from their final score.",
+      "Facilitate a class assembly where students discuss: \"Why is it important to use English during group activities? What makes it difficult? What agreements can we make as a class to help each other use English more?\" Then co-create a class commitment together.",
+      "Separate students who speak Spanish and pair them with English-dominant students to force English use."
+    ],
+    ans: 1,
+    exp: "La Competencia 16 del CNEB 2017 (capacidad <strong>«Construye normas y asume acuerdos y leyes»</strong>) exige que los acuerdos se construyan reflexivamente con los propios estudiantes, no se impongan con sanciones. <strong>B</strong> hace exactamente esto: invita a los estudiantes a reflexionar sobre el propósito del inglés, identificar sus propias barreras y co-crear un compromiso que sienten como propio. <strong>A</strong> es conductismo punitivo. <strong>C</strong> es segregación que no aborda la causa del problema."
+  },
+  {
+    tag: "Trabajo colaborativo — Google Doc sin roles asignados",
+    context: "A teacher wants her students to improve their collaborative skills during group work. She designs the following structure: each group has a shared Google Doc where every member writes simultaneously. There is no assigned role — students negotiate who writes what, leave comments for each other and edit in real time.",
+    stem: "Which learning approach does this reflect?",
+    opts: [
+      "Cooperative learning — the teacher provides a structured framework (Google Doc) with specific roles for each student.",
+      "Collaborative learning — students work with high autonomy, negotiate the process flexibly and co-construct the product through horizontal dialogue without rigid role assignment.",
+      "Individual learning — each student writes in their own section of the document independently."
+    ],
+    ans: 1,
+    exp: "El trabajo <strong>colaborativo</strong> se distingue del cooperativo por la mayor autonomía de los estudiantes y la negociación flexible del proceso (Dillenbourg, 1999). No hay roles fijos asignados por el docente — los estudiantes deciden colectivamente cómo avanzar. La edición simultánea y los comentarios en tiempo real son exactamente la interdependencia positiva alta y el diálogo horizontal que definen la colaboración genuina. El hecho de que el docente elija Google Doc como herramienta no lo convierte en trabajo cooperativo (<strong>A</strong>)."
+  },
+  {
+    tag: "Uso pasivo de las TIC — identificar el distractor",
+    context: null,
+    stem: "Which of the following activities represents <strong>passive use of TIC</strong> in an English class?",
+    opts: [
+      "Students use a shared Google Form to conduct a class survey on \"favorite hobbies,\" then analyze the results and present their findings in English.",
+      "Students record short video podcasts in English about a social issue and upload them to a shared class channel for peer feedback.",
+      "The teacher projects a PDF of the textbook on the screen and reads each exercise aloud while students follow along and copy the answers into their notebooks."
+    ],
+    ans: 2,
+    exp: "El uso pasivo de las TIC ocurre cuando la tecnología reemplaza el material impreso pero el estudiante sigue siendo receptor sin interacción, creación ni transformación. Proyectar un PDF y dictar es exactamente eso — la tecnología es un decorado motivacional sin valor pedagógico adicional. <strong>A</strong> y <strong>B</strong> son usos activos y transformadores: los estudiantes crean, analizan, colaboran y producen contenido original que activa capacidades de la <strong>Competencia 28</strong> del CNEB (p. 151)."
+  },
+  {
+    tag: "Enfoque restaurativo — conflicto por pronunciación",
+    context: "Two students have a conflict during a pair speaking activity — one accuses the other of making fun of his pronunciation.",
+    stem: "The teacher wants to resolve it using the restorative approach. Which statement best describes what the teacher should do?",
+    opts: [
+      "End the pair activity, move both students to different partners and continue the lesson to avoid losing class time.",
+      "Facilitate a brief private conversation with both students after class: ask each to explain what happened and how they felt, help them understand the impact of the behavior, and agree together on how to continue working respectfully.",
+      "Address the situation publicly in front of the class as a learning opportunity about respect, asking the class to reflect on appropriate behavior."
+    ],
+    ans: 1,
+    exp: "La capacidad <strong>«Maneja conflictos de manera constructiva»</strong> (Competencia 16, CNEB 2017) promueve el diálogo asertivo y la mediación formativa <em>en privado</em> para que el estudiante comprenda el impacto de sus acciones y asuma la reparación voluntaria del daño. <strong>A</strong> evita el conflicto sin resolverlo. <strong>C</strong> expone a los estudiantes públicamente, lo que puede profundizar el daño al clima relacional en lugar de repararlo."
+  },
+  {
+    tag: "Interdependencia positiva — técnica Jigsaw",
+    context: "A teacher wants to develop genuine collaborative skills in her students during an English reading activity. She gives each group member a different section of the same text to read. Each member is the only one with their section — to complete the activity, they must share and integrate all sections.",
+    stem: "Which collaborative learning principle does this design apply?",
+    opts: [
+      "Role assignment — each student has a fixed responsibility assigned by the teacher.",
+      "Positive interdependence — no member can complete the task without the others, as each holds unique information essential to the group's success.",
+      "Individual accountability — each student is assessed on their own section independently."
+    ],
+    ans: 1,
+    exp: "Esta es la técnica <strong>Jigsaw</strong>, un ejemplo clásico de <strong>interdependencia positiva alta</strong>: cada miembro tiene información única sin la cual el grupo no puede completar la tarea. Esto fuerza la colaboración real — nadie puede trabajar solo, nadie puede ser pasivo. La interdependencia positiva es la condición que transforma el simple «trabajo grupal» en verdadera colaboración genuina (Dillenbourg, 1999). No confundir con asignación de roles (<strong>A</strong>), que es característica del trabajo cooperativo (Johnson &amp; Johnson, 1989)."
+  }
+];
+
+const letters = ['a','b','c'];
+let cur = 0, score = 0, answered = [];
+
+function render() {
+  if (cur >= Qs.length) { showFinal(); return; }
+  const q = Qs[cur];
+  const locked = answered[cur] !== undefined;
+  const chosen = answered[cur];
+  const total = Qs.length;
+
+  document.getElementById('prog-label').textContent = `Pregunta ${cur+6} de 20`;
+  document.getElementById('prog-score').textContent = `${score} correcta${score!==1?'s':''}`;
+  document.getElementById('prog-fill').style.width = `${((cur+1)/total)*100}%`;
+  document.getElementById('page-tag').textContent = `${cur+6} / 20`;
+  document.getElementById('bottom-pg').textContent = cur+6;
+
+  // Context
+  const ctxHtml = q.context ? `<div class="context-box"><div class="ctx-label">Lea el siguiente caso</div>${q.context.split('\n\n').map(p=>`<p>${p}</p>`).join('')}</div>` : '';
+
+  // Options
+  const optsHtml = q.opts.map((o, i) => {
+    let cls = 'opt' + (locked ? ' locked' : '');
+    if (locked) {
+      if (i === q.ans) cls += ' correct';
+      else if (i === chosen) cls += ' wrong';
+      else cls += ' dimmed';
+    }
+    return `<div class="${cls}" data-i="${i}" role="button" tabindex="${locked?-1:0}">
+      <span class="opt-key-cell">${letters[i]})</span>
+      <span class="opt-text-cell">${o}</span>
+    </div>`;
+  }).join('');
+
+  // Feedback row
+  let feedbackHtml = '';
+  if (locked) {
+    if (chosen === q.ans) {
+      feedbackHtml = `<div class="feedback-row show ok">✓ Respuesta correcta — opción ${letters[q.ans]})</div>`;
+    } else {
+      feedbackHtml = `<div class="feedback-row show bad">✗ Incorrecto. La respuesta correcta es la opción ${letters[q.ans]})</div>`;
+    }
+  }
+
+  document.getElementById('q-body').innerHTML = `
+    <div class="q-number-row">
+      <div class="q-num-badge">${cur+6}</div>
+      <div class="q-text-wrap">
+        ${q.tag ? `<div style="font-family:'Source Sans 3',sans-serif;font-size:.67rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.55rem;">${q.tag}</div>` : ''}
+        ${ctxHtml}
+        <p class="q-stem">${q.stem}</p>
+        <div class="options">${optsHtml}</div>
+        ${feedbackHtml}
+        <div class="explanation${locked?' show':''}" id="exp">
+          <div class="exp-label">▸ Justificación</div>
+          <p class="exp-text">${q.exp}</p>
+        </div>
+      </div>
+    </div>`;
+
+  const btn = document.getElementById('btn-next');
+  btn.disabled = !locked;
+  btn.textContent = cur < Qs.length - 1 ? 'Siguiente' : 'Ver resultado';
+  if (cur < Qs.length - 1) {
+    btn.innerHTML = 'Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+  } else {
+    btn.innerHTML = 'Ver resultado <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+  }
+
+  if (!locked) {
+    document.querySelectorAll('.opt').forEach(el => {
+      el.addEventListener('click', () => pick(+el.dataset.i));
+      el.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') pick(+el.dataset.i); });
+    });
+  }
+
+  btn.onclick = () => { cur++; render(); window.scrollTo(0,0); };
+}
+
+function pick(i) {
+  if (answered[cur] !== undefined) return;
+  answered[cur] = i;
+  if (i === Qs[cur].ans) score++;
+  render();
+}
+
+function showFinal() {
+  document.getElementById('q-body').style.display = 'none';
+  document.getElementById('q-footer').style.display = 'none';
+  document.getElementById('prog-label').textContent = 'Completado';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('bottom-pg').textContent = '—';
+
+  const pct = Math.round(score / Qs.length * 100);
+  const msg = pct === 100 ? 'Puntaje perfecto. Dominas todos los conceptos de casuística.' :
+              pct >= 80  ? 'Muy bien. Repasa brevemente los que fallaste.' :
+              pct >= 60  ? 'Bien encaminado. Revisa la teoría de los temas marcados.' :
+                           'Continúa practicando — revisa la teoría antes de reintentar.';
+
+  const rowsHtml = Qs.map((q, i) => {
+    const ok = answered[i] === q.ans;
+    const stem = q.stem.replace(/<[^>]+>/g,'');
+    const short = stem.length > 80 ? stem.slice(0,80)+'…' : stem;
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${short}</td>
+      <td class="${ok?'ri-ok':'ri-bad'}">${ok ? '✓ Correcto' : '✗ Incorrecto'}</td>
+      <td>${letters[q.ans]})</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('final-body').style.display = 'block';
+  document.getElementById('final-body').innerHTML = `
+    <div class="final-header">Resultado final</div>
+    <div class="final-score-num">${score}<span> / ${Qs.length}</span></div>
+    <div class="final-pct">${pct}% de respuestas correctas</div>
+    <div class="final-bar-wrap"><div class="final-bar" id="fbar"></div></div>
+    <p class="final-msg">${msg}</p>
+    <p class="final-sub" style="margin-bottom:1.75rem;">Fuente: CNEB 2017 · Competencias 16 y 28</p>
+    <table class="review-table">
+      <thead><tr><th>#</th><th>Pregunta</th><th>Resultado</th><th>Clave</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <button class="btn-restart" id="btn-restart">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.8"/></svg>
+      Volver a intentar
+    </button>`;
+
+  setTimeout(() => { document.getElementById('fbar').style.width = pct+'%'; }, 120);
+  document.getElementById('btn-restart').onclick = () => {
+    cur = 0; score = 0; answered = [];
+    document.getElementById('q-body').style.display = 'block';
+    document.getElementById('q-footer').style.display = 'flex';
+    document.getElementById('final-body').style.display = 'none';
+    render(); window.scrollTo(0,0);
+  };
+}
+
+render();
+</script>
+</body>
+</html>
